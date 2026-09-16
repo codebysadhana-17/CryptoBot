@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>⚙ Settings - Crypto Arbitrage Bot</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     SIDEBAR
+===================================================== -->
+
+<aside class="sidebar">
+
+    <div class="logo">
+        ₿ Crypto Arbitrage
+    </div>
+
+
+    <nav>
+
+        <a href="/">
+            🏠 Dashboard
+        </a>
+
+        <a href="/prices">
+            📊 Live Prices
+        </a>
+
+        <a href="/arbitrage">
+            ⚡ Arbitrage
+        </a>
+
+        <a href="/trades">
+            🔄 Trade History
+        </a>
+
+        <a href="/settings" class="active">
+            ⚙ Settings
+        </a>
+
+    </nav>
+
+
+    <div class="bot-status">
+
+        <span class="dot"></span>
+
+        <span>
+            Bot Online
+        </span>
+
+    </div>
+
+</aside>
+
+
+
+<!-- =====================================================
+     MAIN CONTENT
+===================================================== -->
+
+<main class="main">
+
+
+    <!-- HEADER -->
+
+    <header>
+
+        <div>
+
+            <h1>
+                Settings
+            </h1>
+
+            <p>
+                Configure your automated real trading bot
+            </p>
+
+        </div>
+
+
+        <div class="settings-status">
+
+            <span class="status-dot"></span>
+
+            <span>
+                System Online
+            </span>
+
+        </div>
+
+    </header>
+
+
+
+    <!-- =================================================
+         SETTINGS GRID
+    ================================================= -->
+
+    <section class="settings-grid">
+
+
+        <!-- =================================================
+             AUTO TRADE CARD
+        ================================================= -->
+
+        <div class="settings-card">
+
+
+            <div class="settings-card-header">
+
+                <div class="settings-icon auto-icon">
+                    🤖
+                </div>
+
+                <div>
+
+                    <h2>
+                        Automatic Trading
+                    </h2>
+
+                    <p>
+                        Automatically execute profitable
+                        real trades
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="setting-divider"></div>
+
+
+
+            <div class="setting-row">
+
+
+                <div>
+
+                    <strong>
+                        Auto Trade
+                    </strong>
+
+                    <small id="autoTradeDescription">
+                        Automatic trading is enabled
+                    </small>
+
+                </div>
+
+
+                <!-- TOGGLE -->
+
+                <label class="switch">
+
+                    <input
+                        type="checkbox"
+                        id="autoTrade"
+                    >
+
+                    <span class="slider"></span>
+
+                </label>
+
+            </div>
+
+
+
+            <div class="auto-status-box">
+
+                <span
+                    class="status-indicator"
+                    id="autoStatusDot">
+                </span>
+
+                <span id="autoStatusText">
+                    Checking status...
+                </span>
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- =================================================
+             PROFIT SETTINGS
+        ================================================= -->
+
+        <div class="settings-card">
+
+
+            <div class="settings-card-header">
+
+                <div class="settings-icon profit-icon">
+                    💰
+                </div>
+
+                <div>
+
+                    <h2>
+                        Profit Configuration
+                    </h2>
+
+                    <p>
+                        Set the minimum profit required
+                        before a trade is executed
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="setting-divider"></div>
+
+
+
+            <label class="input-label">
+
+                Minimum Profit
+
+            </label>
+
+
+            <div class="profit-input-wrapper">
+
+                <input
+                    type="number"
+                    id="minProfit"
+                    min="0"
+                    step="0.01"
+                    placeholder="0.10"
+                >
+
+                <span>
+                    USDT
+                </span>
+
+            </div>
+
+
+            <small class="input-help">
+
+                Trades below this profit amount
+                will be skipped automatically.
+
+            </small>
+
+
+        </div>
+
+
+
+        <!-- =================================================
+             TRADING MODE & EXECUTION SETTINGS
+        ================================================= -->
+
+        <div class="settings-card">
+
+
+            <div class="settings-card-header">
+
+                <div class="settings-icon mode-icon">
+                    📊
+                </div>
+
+                <div>
+
+                    <h2>
+                        Execution Engine & Mode
+                    </h2>
+
+                    <p>
+                        Choose between Realistic Paper Simulation or Live API Mode
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="setting-divider"></div>
+
+
+
+            <div style="margin-bottom:18px;">
+                <label style="display:block; color:#cbd5e1; font-weight:600; font-size:14px; margin-bottom:8px;">TRADING ENVIRONMENT:</label>
+                <select id="tradingModeSelect" style="width:100%; background:#0c1526; border:1px solid #202e45; color:white; padding:12px; border-radius:8px; font-size:14px; font-weight:600;">
+                    <option value="PAPER">⚡ Paper Trading Mode (Realistic Order Book Simulator)</option>
+                    <option value="LIVE">🔴 Live Trading Mode (API Keys / Real Wallet Mode)</option>
+                </select>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+
+                <div>
+                    <label style="display:block; color:#94a3b8; font-size:12px; font-weight:600; margin-bottom:6px;">DEFAULT TRADE SIZE (USDT)</label>
+                    <input type="number" id="tradeAmount" value="1000" min="10" step="50" style="width:100%; background:#0c1526; border:1px solid #202e45; color:white; padding:10px; border-radius:8px; font-size:14px;">
+                </div>
+
+                <div>
+                    <label style="display:block; color:#94a3b8; font-size:12px; font-weight:600; margin-bottom:6px;">SLIPPAGE SIMULATION</label>
+                    <label class="switch" style="margin-top:4px;">
+                        <input type="checkbox" id="slippageToggle" checked onchange="toggleSlippageSim(this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+            </div>
+
+            <div style="margin-top:20px; padding-top:15px; border-top:1px solid #1e293b; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <strong style="color:white; font-size:13px;">Reset Paper Balance</strong>
+                    <p style="color:#64748b; font-size:12px;">Reset portfolio back to initial $10,000 USDT test capital.</p>
+                </div>
+                <button type="button" onclick="resetWalletInSettings()" style="background:#ef4444; border:none; padding:8px 14px; border-radius:8px; color:white; font-weight:600; cursor:pointer; font-size:12px;">
+                    ↻ Reset Wallet
+                </button>
+            </div>
+
+
+        </div>
+
+
+
+
+        <!-- =================================================
+             EXCHANGE API KEYS CONFIGURATION (LIVE TRADING)
+        ================================================= -->
+
+        <div class="settings-card" style="grid-column: span 2;">
+
+
+            <div class="settings-card-header">
+
+                <div class="settings-icon exchange-icon">
+                    🔑
+                </div>
+
+                <div>
+
+                    <h2>
+                        Exchange API Keys (Live Trading)
+                    </h2>
+
+                    <p>
+                        Configure your API keys for real trading. Use keys with Trading permissions enabled and Withdrawal permissions DISABLED.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="setting-divider"></div>
+
+
+            <div class="api-keys-grid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:20px;">
+
+                <!-- BINANCE API KEY -->
+                <div class="key-card" style="background:#0c1526; border:1px solid #202e45; border-radius:12px; padding:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <strong style="color:white; font-size:15px;">Binance API</strong>
+                        <span id="binanceKeyBadge" style="font-size:11px; background:#1e293b; color:#94a3b8; padding:3px 8px; border-radius:12px;">Not Configured</span>
+                    </div>
+
+                    <div style="margin-bottom:10px;">
+                        <label style="display:block; color:#94a3b8; font-size:11px; font-weight:600; margin-bottom:4px;">API KEY</label>
+                        <input type="text" id="binanceApiKey" placeholder="Enter Binance API Key" style="width:100%; background:#111a2b; border:1px solid #202e45; color:white; padding:8px 10px; border-radius:6px; font-size:12px;">
+                    </div>
+
+                    <div style="margin-bottom:12px;">
+                        <label style="display:block; color:#94a3b8; font-size:11px; font-weight:600; margin-bottom:4px;">API SECRET</label>
+                        <input type="password" id="binanceApiSecret" placeholder="Enter API Secret" style="width:100%; background:#111a2b; border:1px solid #202e45; color:white; padding:8px 10px; border-radius:6px; font-size:12px;">
+                    </div>
+
+                    <div style="display:flex; gap:8px;">
+                        <button type="button" onclick="saveApiKey('Binance')" style="flex:1; background:#2563eb; border:none; color:white; padding:8px; border-radius:6px; font-weight:600; font-size:12px; cursor:pointer;">💾 Save Key</button>
+                        <button type="button" id="binanceTestBtn" onclick="testApiConnection('Binance')" style="background:#1e293b; border:1px solid #334155; color:#cbd5e1; padding:8px 12px; border-radius:6px; font-weight:600; font-size:12px; cursor:pointer;">⚡ Test</button>
+                    </div>
+
+                    <div id="binanceKeyMsg" style="margin-top:10px; font-size:11px; color:#94a3b8;"></div>
+                </div>
+
+                <!-- BYBIT API KEY -->
+                <div class="key-card" style="background:#0c1526; border:1px solid #202e45; border-radius:12px; padding:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <strong style="color:white; font-size:15px;">Bybit API</strong>
+                        <span id="bybitKeyBadge" style="font-size:11px; background:#1e293b; color:#94a3b8; padding:3px 8px; border-radius:12px;">Not Configured</span>
+                    </div>
+
+                    <div style="margin-bottom:10px;">
+                        <label style="display:block; color:#94a3b8; font-size:11px; font-weight:600; margin-bottom:4px;">API KEY</label>
+                        <input type="text" id="bybitApiKey" placeholder="Enter Bybit API Key" style="width:100%; background:#111a2b; border:1px solid #202e45; color:white; padding:8px 10px; border-radius:6px; font-size:12px;">
+                    </div>
+
+                    <div style="margin-bottom:12px;">
+                        <label style="display:block; color:#94a3b8; font-size:11px; font-weight:600; margin-bottom:4px;">API SECRET</label>
+                        <input type="password" id="bybitApiSecret" placeholder="Enter API Secret" style="width:100%; background:#111a2b; border:1px solid #202e45; color:white; padding:8px 10px; border-radius:6px; font-size:12px;">
+                    </div>
+
+                    <div style="display:flex; gap:8px;">
+                        <button type="button" onclick="saveApiKey('Bybit')" style="flex:1; background:#2563eb; border:none; color:white; padding:8px; border-radius:6px; font-weight:600; font-size:12px; cursor:pointer;">💾 Save Key</button>
+                        <button type="button" id="bybitTestBtn" onclick="testApiConnection('Bybit')" style="background:#1e293b; border:1px solid #334155; color:#cbd5e1; padding:8px 12px; border-radius:6px; font-weight:600; font-size:12px; cursor:pointer;">⚡ Test</button>
+                    </div>
+
+                    <div id="bybitKeyMsg" style="margin-top:10px; font-size:11px; color:#94a3b8;"></div>
+                </div>
+
+                <!-- KUCOIN API KEY -->
+                <div class="key-card" style="background:#0c1526; border:1px solid #202e45; border-radius:12px; padding:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <strong style="color:white; font-size:15px;">KuCoin API</strong>
+                        <span id="kucoinKeyBadge" style="font-size:11px; background:#1e293b; color:#94a3b8; padding:3px 8px; border-radius:12px;">Not Configured</span>
+                    </div>
+
+                    <div style="margin-bottom:10px;">
+                        <label style="display:block; color:#94a3b8; font-size:11px; font-weight:600; margin-bottom:4px;">API KEY</label>
+                        <input type="text" id="kucoinApiKey" placeholder="Enter KuCoin API Key" autocomplete="off" style="width:100%; background:#111a2b; border:1px solid #202e45; color:white; padding:8px 10px; border-radius:6px; font-size:12px;">
+                    </div>
+
+                    <div style="margin-bottom:10px;">
+                        <label style="display:block; color:#94a3b8; font-size:11px; font-weight:600; margin-bottom:4px;">API SECRET</label>
+                        <input type="password" id="kucoinApiSecret" placeholder="Enter KuCoin API Secret" autocomplete="new-password" style="width:100%; background:#111a2b; border:1px solid #202e45; color:white; padding:8px 10px; border-radius:6px; font-size:12px;">
+                    </div>
+
+                    <div style="margin-bottom:12px;">
+                        <label style="display:block; color:#94a3b8; font-size:11px; font-weight:600; margin-bottom:4px;">API PASSPHRASE</label>
+                        <input type="password" id="kucoinApiPassphrase" placeholder="Enter KuCoin API Passphrase" autocomplete="new-password" style="width:100%; background:#111a2b; border:1px solid #202e45; color:white; padding:8px 10px; border-radius:6px; font-size:12px;">
+                    </div>
+
+                    <div style="display:flex; gap:8px;">
+                        <button type="button" onclick="saveApiKey('KuCoin')" style="flex:1; background:#2563eb; border:none; color:white; padding:8px; border-radius:6px; font-weight:600; font-size:12px; cursor:pointer;">💾 Save Key</button>
+                        <button type="button" id="kucoinTestBtn" onclick="testApiConnection('KuCoin')" style="background:#1e293b; border:1px solid #334155; color:#cbd5e1; padding:8px 12px; border-radius:6px; font-weight:600; font-size:12px; cursor:pointer;">⚡ Test</button>
+                    </div>
+
+                    <div id="kucoinKeyMsg" style="margin-top:10px; font-size:11px; color:#94a3b8;"></div>
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+    </section>
+
+
+
+    <!-- =================================================
+         SAVE SECTION
+    ================================================= -->
+
+    <section class="save-panel">
+
+
+        <div>
+
+            <div class="save-title">
+
+                <span class="save-icon">
+                    ⚙
+                </span>
+
+                <div>
+
+                    <h2>
+                        Bot Configuration
+                    </h2>
+
+                    <p id="saveMessage">
+                        Changes will apply immediately to
+                        automatic real trading.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <button
+            type="button"
+            class="save-button"
+            id="saveSettings"
+        >
+
+            <span>
+                💾
+            </span>
+
+            Save Settings
+
+        </button>
+
+
+    </section>
+
+
+
+    <!-- =================================================
+         CURRENT CONFIGURATION
+    ================================================= -->
+
+    <section class="config-panel">
+
+
+        <div class="config-header">
+
+            <div>
+
+                <h2>
+                    Current Configuration
+                </h2>
+
+                <p>
+                    Live bot configuration
+                </p>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="config-items">
+
+
+            <div class="config-item">
+
+                <span>
+                    Auto Trading
+                </span>
+
+                <strong id="currentAutoTrade">
+                    --
+                </strong>
+
+            </div>
+
+
+            <div class="config-item">
+
+                <span>
+                    Minimum Profit
+                </span>
+
+                <strong id="currentMinProfit">
+                    --
+                </strong>
+
+            </div>
+
+
+            <div class="config-item">
+
+                <span>
+                    Trading Mode
+                </span>
+
+                <strong>
+                    Real Trading (LIVE)
+                </strong>
+
+            </div>
+
+
+            <div class="config-item">
+
+                <span>
+                    Trading Pair
+                </span>
+
+                <strong>
+                    ETH / USDT
+                </strong>
+
+            </div>
+
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- =================================================
+         FOOTER
+    ================================================= -->
+
+    <footer>
+
+        Crypto Arbitrage Bot
+        •
+        Real Trading Mode (LIVE)
+
+    </footer>
+
+
+</main>
+
+
+
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
+
+<script>
+
+
+// =====================================================
+// ELEMENTS
+// =====================================================
+
+const autoTrade =
+    document.getElementById("autoTrade");
+
+const minProfit =
+    document.getElementById("minProfit");
+
+const saveButton =
+    document.getElementById("saveSettings");
+
+const saveMessage =
+    document.getElementById("saveMessage");
+
+const autoStatusText =
+    document.getElementById("autoStatusText");
+
+const autoStatusDot =
+    document.getElementById("autoStatusDot");
+
+const autoTradeDescription =
+    document.getElementById(
+        "autoTradeDescription"
+    );
+
+const currentAutoTrade =
+    document.getElementById(
+        "currentAutoTrade"
+    );
+
+const currentMinProfit =
+    document.getElementById(
+        "currentMinProfit"
+    );
+
+
+const tradingModeSelect = document.getElementById("tradingModeSelect");
+const tradeAmount = document.getElementById("tradeAmount");
+const slippageToggle = document.getElementById("slippageToggle");
+
+
+// =====================================================
+// LOAD SETTINGS
+// =====================================================
+
+async function loadSettings() {
+
+    try {
+
+        const response = await fetch("/api/settings");
+        const result = await response.json();
+
+        if (!result.success) throw new Error("Unable to load settings");
+
+        const settings = result.settings;
+
+        autoTrade.checked = Boolean(settings.auto_trade);
+        minProfit.value = settings.min_profit;
+
+        if (tradingModeSelect) tradingModeSelect.value = settings.trading_mode || "PAPER";
+        if (tradeAmount) tradeAmount.value = settings.trade_amount || 1000;
+        if (slippageToggle && document.activeElement !== slippageToggle) {
+            slippageToggle.checked = settings.slippage_enabled !== false;
+        }
+
+        updateAutoTradeUI(settings.auto_trade);
+        updateCurrentConfiguration(settings);
+
+    } catch (error) {
+        console.error("Settings Load Error:", error);
+        saveMessage.innerText = "❌ Unable to load settings.";
+    }
+
+}
+
+async function toggleSlippageSim(enabled) {
+    try {
+        const response = await fetch("/api/settings", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ slippage_enabled: Boolean(enabled) })
+        });
+        const result = await response.json();
+        if (result.success && result.settings) {
+            console.log("Slippage SIM updated:", result.settings.slippage_enabled);
+        }
+    } catch (e) {
+        console.error("Failed to toggle Slippage SIM:", e);
+    }
+}
+
+
+// =====================================================
+// RESET WALLET IN SETTINGS
+// =====================================================
+
+async function resetWalletInSettings() {
+    if (!confirm("Are you sure you want to reset your paper wallet back to $10,000 USDT?")) return;
+
+    try {
+        const response = await fetch("/api/portfolio/reset", { method: "POST" });
+        const result = await response.json();
+        if (result.success) {
+            alert("✅ Paper wallet reset to $10,000 USDT!");
+        }
+    } catch (e) {
+        console.error(e);
+        alert("Failed to reset wallet.");
+    }
+}
+
+
+// =====================================================
+// UPDATE AUTO TRADE UI
+// =====================================================
+
+function updateAutoTradeUI(enabled) {
+
+    if (enabled) {
+
+        autoStatusText.innerText = "Automatic trading is ACTIVE";
+        autoTradeDescription.innerText = "The bot can automatically execute profitable real trades.";
+        autoStatusDot.classList.add("active");
+
+    } else {
+
+        autoStatusText.innerText = "Automatic trading is OFF";
+        autoTradeDescription.innerText = "The bot will monitor opportunities but will not execute trades.";
+        autoStatusDot.classList.remove("active");
+
+    }
+
+}
+
+
+// =====================================================
+// UPDATE CURRENT CONFIGURATION
+// =====================================================
+
+function updateCurrentConfiguration(settings) {
+
+    currentAutoTrade.innerText = settings.auto_trade ? "ENABLED" : "DISABLED";
+    currentAutoTrade.className = settings.auto_trade ? "config-enabled" : "config-disabled";
+
+    currentMinProfit.innerText = Number(settings.min_profit).toFixed(2) + " USDT";
+
+}
+
+
+// =====================================================
+// SAVE SETTINGS
+// =====================================================
+
+saveButton.addEventListener("click", async function () {
+
+    const profitValue = Number(minProfit.value);
+    const amountVal = Number(tradeAmount ? tradeAmount.value : 1000);
+
+    if (Number.isNaN(profitValue) || profitValue < 0) {
+        saveMessage.innerText = "❌ Please enter a valid minimum profit.";
+        return;
+    }
+
+    saveButton.disabled = true;
+    saveButton.innerHTML = "⏳ Saving...";
+
+    try {
+
+        const response = await fetch("/api/settings", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                auto_trade: autoTrade.checked,
+                min_profit: profitValue,
+                trade_amount: amountVal,
+                slippage_enabled: slippageToggle ? slippageToggle.checked : true,
+                trading_mode: tradingModeSelect ? tradingModeSelect.value : "PAPER"
+            })
+        });
+
+        const result = await response.json();
+
+        if (!result.success) throw new Error(result.message || "Failed to save settings");
+
+        updateAutoTradeUI(result.settings.auto_trade);
+        updateCurrentConfiguration(result.settings);
+
+        saveMessage.innerText = "✅ Settings saved successfully.";
+        saveMessage.classList.add("save-success");
+
+        saveButton.innerHTML = "✓ Saved";
+
+        setTimeout(() => {
+            saveButton.innerHTML = "💾 Save Settings";
+            saveMessage.innerText = "Changes will apply immediately to real execution engine.";
+            saveMessage.classList.remove("save-success");
+        }, 2500);
+
+    } catch (error) {
+        console.error("Settings Save Error:", error);
+        saveMessage.innerText = "❌ " + error.message;
+    } finally {
+        saveButton.disabled = false;
+    }
+
+});
+
+
+// =====================================================
+// API KEYS MANAGEMENT JS
+// =====================================================
+
+async function loadApiKeys() {
+    try {
+        const response = await fetch("/api/keys");
+        const result = await response.json();
+        if (!result.success) return;
+
+        const keys = result.keys || {};
+        ["Binance", "Bybit", "KuCoin"].forEach(ex => {
+            const badge = document.getElementById(`${ex.toLowerCase()}KeyBadge`);
+            const testButton = document.getElementById(`${ex.toLowerCase()}TestBtn`);
+            const keyInfo = keys[ex] || keys[ex.toLowerCase()];
+            if (badge && keyInfo && keyInfo.configured === true) {
+                badge.innerText = "Configured (" + keyInfo.api_key_masked + ")";
+                badge.style.background = "#132b20";
+                badge.style.color = "#22c55e";
+                if (testButton) testButton.style.display = "inline-block";
+            } else if (badge) {
+                badge.innerText = "Not Configured";
+                badge.style.background = "#1e293b";
+                badge.style.color = "#94a3b8";
+                if (testButton) testButton.style.display = "inline-block";
+            }
+        });
+
+    } catch (e) {
+        console.error("API Key load error:", e);
+    }
+}
+
+async function saveApiKey(exchange) {
+    const exLower = exchange.toLowerCase();
+    const apiKey = document.getElementById(`${exLower}ApiKey`).value.trim();
+    const apiSecret = document.getElementById(`${exLower}ApiSecret`).value.trim();
+    const passphrase = document.getElementById(`${exLower}ApiPassphrase`)?.value.trim() || "";
+    const msg = document.getElementById(`${exLower}KeyMsg`);
+
+    if (!apiKey || !apiSecret || (exchange === "KuCoin" && !passphrase)) {
+        msg.style.color = "#ef4444";
+        msg.innerText = exchange === "KuCoin"
+            ? "❌ API Key, Secret, and Passphrase are required."
+            : "❌ API Key and Secret are required.";
+        return;
+    }
+
+    msg.style.color = "#eab308";
+    msg.innerText = "⏳ Saving...";
+
+    try {
+        const response = await fetch("/api/keys", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ exchange, api_key: apiKey, api_secret: apiSecret, api_passphrase: passphrase })
+        });
+        const result = await response.json();
+        if (result.success) {
+            msg.style.color = "#22c55e";
+            msg.innerText = "✅ Saved securely. Test the connection to verify wallet access.";
+            document.getElementById(`${exLower}ApiKey`).value = "";
+            document.getElementById(`${exLower}ApiSecret`).value = "";
+            const passphraseEl = document.getElementById(`${exLower}ApiPassphrase`);
+            if (passphraseEl) passphraseEl.value = "";
+            await loadApiKeys();
+        } else {
+            msg.style.color = "#ef4444";
+            msg.innerText = "❌ " + result.message;
+        }
+    } catch (e) {
+        msg.style.color = "#ef4444";
+        msg.innerText = "❌ Failed to save API Key.";
+    }
+}
+
+async function testApiConnection(exchange) {
+    const exLower = exchange.toLowerCase();
+    const msg = document.getElementById(`${exLower}KeyMsg`);
+    const apiKey = document.getElementById(`${exLower}ApiKey`)?.value.trim() || "";
+    const apiSecret = document.getElementById(`${exLower}ApiSecret`)?.value.trim() || "";
+    const passphrase = document.getElementById(`${exLower}ApiPassphrase`)?.value.trim() || "";
+
+    msg.style.color = "#3b82f6";
+    msg.innerText = `⏳ Testing connection to ${exchange}...`;
+
+    try {
+        const response = await fetch("/api/keys/test", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ exchange, api_key: apiKey, api_secret: apiSecret, api_passphrase: passphrase })
+        });
+        const result = await response.json();
+        if (result.success) {
+            msg.style.color = "#22c55e";
+            msg.innerText = `🟢 Connected! Balance: $${result.usdt_balance} USDT | ${result.eth_balance} ETH`;
+            const badge = document.getElementById(`${exLower}KeyBadge`);
+            if (badge) {
+                badge.innerText = "Connected";
+                badge.style.background = "#132b20";
+                badge.style.color = "#22c55e";
+            }
+        } else {
+            msg.style.color = "#ef4444";
+            msg.innerText = result.message || "Connection failed.";
+            const badge = document.getElementById(`${exLower}KeyBadge`);
+            if (badge) {
+                badge.innerText = "Disconnected";
+                badge.style.background = "#3b1720";
+                badge.style.color = "#ef4444";
+            }
+        }
+    } catch (e) {
+        msg.style.color = "#ef4444";
+        msg.innerText = "❌ Network error during connection test.";
+    }
+}
+
+
+// =====================================================
+// INITIAL LOAD
+// =====================================================
+
+loadSettings();
+loadApiKeys();
+
+</script>
+
+</body>
+
+</html>
+

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>📊 Live Prices - Crypto Arbitrage Bot</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<aside class="sidebar">
+
+    <div class="logo">
+        ₿ Crypto Arbitrage
+    </div>
+
+    <nav>
+
+        <a href="/">
+            🏠 Dashboard
+        </a>
+
+        <a href="/prices" class="active">
+            📊 Live Prices
+        </a>
+
+        <a href="/arbitrage">
+            ⚡ Arbitrage
+        </a>
+
+        <a href="/trades">
+            🔄 Trade History
+        </a>
+
+        <a href="/settings">
+            ⚙ Settings
+        </a>
+
+    </nav>
+
+    <div class="bot-status">
+        <span class="dot"></span>
+        <span>Bot Online</span>
+    </div>
+
+</aside>
+
+
+<main class="main">
+
+    <header>
+
+        <div>
+
+            <h1>Live Prices</h1>
+
+            <p>
+                Real-time ETH / USDT prices
+            </p>
+
+        </div>
+
+        <div id="time">
+            --:--:--
+        </div>
+
+    </header>
+
+
+    <section class="cards">
+
+        <div class="card">
+
+            <span>Binance</span>
+
+            <h2 id="binance">
+                --
+            </h2>
+
+            <small>
+                ETH / USDT
+            </small>
+
+        </div>
+
+        <div class="card">
+
+            <span>KuCoin</span>
+
+            <h2 id="kucoin">
+                --
+            </h2>
+
+            <small>
+                ETH / USDT
+            </small>
+
+        </div>
+
+
+        <div class="card">
+
+            <span>Bybit</span>
+
+            <h2 id="bybit">
+                --
+            </h2>
+
+            <small>
+                ETH / USDT
+            </small>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<script>
+
+function updateTime() {
+
+    document.getElementById("time").innerText =
+        new Date().toLocaleTimeString();
+
+}
+
+updateTime();
+
+setInterval(updateTime, 1000);
+
+
+async function loadPrices() {
+
+    try {
+
+        const response =
+            await fetch("/api/market", { cache: "no-store" });
+
+        const result =
+            await response.json();
+
+        if (!result.success) return;
+
+        const data =
+            result.data;
+
+
+        if (data.prices.Binance) {
+            document.getElementById("binance").innerText = Number(data.prices.Binance).toFixed(2);
+        }
+
+        if (data.prices.Bybit) {
+            document.getElementById("bybit").innerText = Number(data.prices.Bybit).toFixed(2);
+        }
+
+        if (data.prices.KuCoin) {
+            document.getElementById("kucoin").innerText = Number(data.prices.KuCoin).toFixed(2);
+        }
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+    }
+
+}
+
+
+loadPrices();
+
+setInterval(loadPrices, 1000);
+
+</script>
+
+</body>
+
+</html>
