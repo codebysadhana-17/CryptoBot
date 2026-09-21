@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>⚡ Arbitrage - Crypto Arbitrage Bot</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        .size-btn {
+            background: #0c1526;
+            border: 1px solid #202e45;
+            color: #94a3b8;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .size-btn.active, .size-btn:hover {
+            background: #2563eb;
+            color: white;
+            border-color: #3b82f6;
+        }
+        /* EXECUTION MODAL */
+        #execModalOverlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(4, 9, 20, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 99999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .exec-modal {
+            background: #111a2b;
+            border: 1px solid #263753;
+            border-radius: 16px;
+            width: 480px;
+            max-width: 90%;
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            position: relative;
+        }
+        .step-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+            transition: opacity 0.3s ease;
+        }
+        .step-item.active {
+            opacity: 1;
+        }
+        .step-item.completed .step-icon {
+            background: #22c55e;
+            color: white;
+        }
+        .step-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #1e293b;
+            border: 1px solid #334155;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        .pulse-loader {
+            width: 14px;
+            height: 14px;
+            border: 2px solid #3b82f6;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+    </style>
+
+</head>
+
+<body>
+
+<aside class="sidebar">
+
+    <div class="logo">
+        ₿ Crypto Arbitrage
+    </div>
+
+    <nav>
+
+        <a href="/">
+            🏠 Dashboard
+        </a>
+
+        <a href="/prices">
+            📊 Live Prices
+        </a>
+
+        <a href="/arbitrage" class="active">
+            ⚡ Arbitrage
+        </a>
+
+        <a href="/trades">
+            🔄 Trade History
+        </a>
+
+        <a href="/settings">
+            ⚙ Settings
+        </a>
+
+    </nav>
+
+    <div class="bot-status">
+
+        <span class="dot"></span>
+        <span>Bot Online</span>
+
+    </div>
+
+</aside>
+
+
+<main class="main">
+
+    <header>
+
+        <div>
+
+            <h1>Arbitrage Execution Engine</h1>
+
+            <p>
+                Real-time price difference & live order execution
+            </p>
+
+        </div>
+
+        <div id="time">
+            --:--:--
+        </div>
+
+    </header>
+
+
+    <!-- ARBITRAGE PANEL -->
+
+    <section class="panel">
+
+        <div class="panel-title">
+            <div>
+                <h2>Live Pair Analysis</h2>
+                <p>Order book & spread calculation</p>
+            </div>
+            <span id="oppBadge" style="background:#132b20; color:#22c55e; padding:6px 12px; border-radius:20px; font-size:12px; border:1px solid #1e5a3b;">
+                Scanning exchanges...
+            </span>
+        </div>
+
+        <div class="opportunity">
+
+            <div>
+
+                <small>LOWEST PRICE (BUY)</small>
+
+                <h3 id="buy">
+                    --
+                </h3>
+
+                <p id="buyPrice">
+                    -- USDT
+                </p>
+
+            </div>
+
+
+            <div class="arrow">
+                →
+            </div>
+
+
+            <div>
+
+                <small>HIGHEST PRICE (SELL)</small>
+
+                <h3 id="sell">
+                    --
+                </h3>
+
+                <p id="sellPrice">
+                    -- USDT
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <small>PRICE DIFFERENCE</small>
+
+                <h3 id="difference">
+                    -- USDT
+                </h3>
+
+            </div>
+
+
+            <div>
+
+                <small>NET PROFIT</small>
+
+                <h3 id="profit" style="color:#22c55e;">
+                    -- USDT
+                </h3>
+
+            </div>
+
+        </div>
+
+
+        <!-- ORDER SIZING SELECTOR -->
+
+        <div style="margin-top:25px;">
+            <label style="display:block; color:#94a3b8; font-size:13px; font-weight:600; margin-bottom:10px;">SELECT TRADE AMOUNT (USDT):</label>
+            <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+                <button class="size-btn active" onclick="selectTradeSize(5, this)">$5</button>
+                <button class="size-btn" onclick="selectTradeSize(10, this)">$10</button>
+                <button class="size-btn" onclick="selectTradeSize(15, this)">$15</button>
+                <button class="size-btn" onclick="selectTradeSize(20, this)">$20</button>
+                <input type="number" id="customTradeSize" placeholder="Custom USDT" style="background:#0c1526; border:1px solid #202e45; color:white; padding:10px 14px; border-radius:8px; width:130px; font-size:14px;" oninput="onCustomSizeInput(this.value)">
+            </div>
+        </div>
+
+
+        <!-- TRADE BUTTON -->
+
+        <button
+            id="tradeButton"
+            onclick="executeTrade()"
+            style="
+                width:100%;
+                margin-top:25px;
+                padding:16px;
+                border:none;
+                border-radius:10px;
+                background:#2563eb;
+                color:white;
+                font-size:17px;
+                font-weight:600;
+                cursor:pointer;
+                transition:0.2s ease;
+            "
+        >
+
+            ⚡ Execute Real Trade
+
+        </button>
+
+
+        <div
+            id="message"
+            style="
+                margin-top:15px;
+                text-align:center;
+                font-weight:600;
+            "
+        ></div>
+
+    </section>
+
+</main>
+
+
+<!-- STEP-BY-STEP EXECUTION MODAL -->
+
+<div id="execModalOverlay">
+
+    <div class="exec-modal">
+
+        <h3 id="execModalTitle" style="color:white; font-size:20px; margin-bottom:6px;">⚡ Executing Realistic Trade...</h3>
+        <p id="execModalSub" style="color:#64748b; font-size:13px; margin-bottom:24px;">Routing order through CCXT exchange engine</p>
+
+        <div id="stepsContainer">
+
+            <!-- STEP 1 -->
+            <div class="step-item" id="step1">
+                <div class="step-icon" id="step1Icon">1</div>
+                <div>
+                    <strong style="color:white; font-size:14px;" id="step1Title">Submitting BUY Order</strong>
+                    <div style="color:#94a3b8; font-size:12px; margin-top:2px;" id="step1Detail">Placing Limit Buy order...</div>
+                </div>
+            </div>
+
+            <!-- STEP 2 -->
+            <div class="step-item" id="step2">
+                <div class="step-icon" id="step2Icon">2</div>
+                <div>
+                    <strong style="color:white; font-size:14px;" id="step2Title">Transferring Asset</strong>
+                    <div style="color:#94a3b8; font-size:12px; margin-top:2px;" id="step2Detail">Awaiting network confirmation...</div>
+                </div>
+            </div>
+
+            <!-- STEP 3 -->
+            <div class="step-item" id="step3">
+                <div class="step-icon" id="step3Icon">3</div>
+                <div>
+                    <strong style="color:white; font-size:14px;" id="step3Title">Executing SELL Order</strong>
+                    <div style="color:#94a3b8; font-size:12px; margin-top:2px;" id="step3Detail">Submitting Market Sell order...</div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- SUMMARY BOX (POPULATED AFTER COMPLETE) -->
+        <div id="modalSummaryBox" style="display:none; background:#0c1526; border:1px solid #202e45; border-radius:12px; padding:16px; margin-top:15px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                <span style="color:#64748b; font-size:13px;">Executed Quantity:</span>
+                <strong style="color:white; font-size:13px;" id="sumEth">-- ETH</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                <span style="color:#64748b; font-size:13px;">Estimated Slippage:</span>
+                <strong style="color:#eab308; font-size:13px;" id="sumSlip">0.05%</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                <span style="color:#64748b; font-size:13px;">Total Fees:</span>
+                <strong style="color:#94a3b8; font-size:13px;" id="sumFees">-- USDT</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; border-top:1px solid #1e293b; padding-top:8px; margin-top:8px;">
+                <span style="color:#64748b; font-weight:600; font-size:14px;">Net Realized Profit:</span>
+                <strong style="color:#22c55e; font-weight:bold; font-size:16px;" id="sumProfit">+0.00 USDT</strong>
+            </div>
+        </div>
+
+
+        <button id="modalCloseBtn" onclick="closeExecModal()" style="display:none; width:100%; margin-top:20px; padding:12px; background:#22c55e; border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer;">
+            Done & View History →
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+let selectedTradeSize = 5;
+
+function updateTime() {
+    document.getElementById("time").innerText = new Date().toLocaleTimeString();
+}
+updateTime();
+setInterval(updateTime, 1000);
+
+function selectTradeSize(size, element) {
+    selectedTradeSize = size;
+    document.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('active'));
+    element.classList.add('active');
+    document.getElementById('customTradeSize').value = '';
+}
+
+function onCustomSizeInput(val) {
+    const parsed = parseFloat(val);
+    if (parsed > 0) {
+        selectedTradeSize = parsed;
+        document.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('active'));
+    }
+}
+
+
+/* ==============================
+   LOAD MARKET
+============================== */
+
+async function loadArbitrage() {
+    try {
+        const response = await fetch("/api/market");
+        const result = await response.json();
+        if (!result.success) return;
+
+        const data = result.data;
+
+        document.getElementById("buy").innerText = data.buy_exchange;
+        document.getElementById("sell").innerText = data.sell_exchange;
+        document.getElementById("buyPrice").innerText = Number(data.buy_price).toFixed(2) + " USDT";
+        document.getElementById("sellPrice").innerText = Number(data.sell_price).toFixed(2) + " USDT";
+        document.getElementById("difference").innerText = Number(data.difference).toFixed(2) + " USDT";
+        document.getElementById("profit").innerText = Number(data.net_profit).toFixed(2) + " USDT";
+
+        const oppBadge = document.getElementById("oppBadge");
+        if (Number(data.net_profit) >= (data.minimum_profit || 0.1)) {
+            oppBadge.innerText = "🟢 Profitable Opportunity";
+            oppBadge.style.background = "#132b20";
+            oppBadge.style.color = "#22c55e";
+        } else {
+            oppBadge.innerText = "🟡 Low Spread Opportunity";
+            oppBadge.style.background = "#2b2313";
+            oppBadge.style.color = "#eab308";
+        }
+
+    } catch (error) {
+        console.error("Market error:", error);
+    }
+}
+
+
+/* ==============================
+   EXECUTE TRADE MODAL STEPPER
+============================== */
+
+function resetExecModal() {
+    document.getElementById("execModalTitle").innerText = "⚡ Executing Realistic Trade...";
+    document.getElementById("execModalSub").innerText = "Routing order through exchange execution engine";
+
+    for (let i = 1; i <= 3; i++) {
+        const step = document.getElementById(`step${i}`);
+        const icon = document.getElementById(`step${i}Icon`);
+        step.classList.remove("active", "completed");
+        icon.innerHTML = i;
+    }
+    document.getElementById("modalSummaryBox").style.display = "none";
+    document.getElementById("modalCloseBtn").style.display = "none";
+}
+
+function showStep(stepNum, titleText, detailText, isDone = false) {
+    const step = document.getElementById(`step${stepNum}`);
+    const icon = document.getElementById(`step${stepNum}Icon`);
+
+    step.classList.add("active");
+    if (titleText) document.getElementById(`step${stepNum}Title`).innerText = titleText;
+    if (detailText) document.getElementById(`step${stepNum}Detail`).innerText = detailText;
+
+    if (isDone) {
+        step.classList.add("completed");
+        icon.innerHTML = "✓";
+    } else {
+        icon.innerHTML = `<div class="pulse-loader"></div>`;
+    }
+}
+
+function closeExecModal() {
+    document.getElementById("execModalOverlay").style.display = "none";
+    window.location.href = "/trades";
+}
+
+
+/* ==============================
+   EXECUTE REAL TRADE
+============================== */
+
+async function executeTrade() {
+    const button = document.getElementById("tradeButton");
+    const message = document.getElementById("message");
+
+    button.disabled = true;
+    message.innerText = "";
+
+    // Show Modal
+    resetExecModal();
+    document.getElementById("execModalOverlay").style.display = "flex";
+
+    // Step 1 active
+    showStep(1, "Submitting BUY Order", `Placing buy order for $${selectedTradeSize} USDT...`, false);
+
+    try {
+        const response = await fetch("/api/trade", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ trade_amount: selectedTradeSize })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            const trade = result.trade;
+
+            // Step 1 done
+            showStep(1, `BUY Order Filled (${trade.buy})`, `Order ID: ${trade.buy_order_id} | Price: $${trade.effective_buy_price}`, true);
+
+            // Step 2 active -> done
+            await new Promise(r => setTimeout(r, 400));
+            showStep(2, `Cross-Exchange Transfer`, `Transferring ${trade.eth_amount} ETH -> ${trade.sell}`, true);
+
+            // Step 3 active -> done
+            await new Promise(r => setTimeout(r, 400));
+            showStep(3, `SELL Order Filled (${trade.sell})`, `Order ID: ${trade.sell_order_id} | Price: $${trade.effective_sell_price}`, true);
+
+            // Populate summary
+            document.getElementById("execModalTitle").innerText = "🎉 Trade Execution Completed!";
+            document.getElementById("execModalSub").innerText = "Orders matched and saved to persistent database.";
+
+            document.getElementById("sumEth").innerText = `${trade.eth_amount} ETH`;
+            document.getElementById("sumSlip").innerText = `${trade.slippage}%`;
+            document.getElementById("sumFees").innerText = `$${trade.fees} USDT`;
+            document.getElementById("sumProfit").innerText = `+${trade.profit} USDT`;
+
+            document.getElementById("modalSummaryBox").style.display = "block";
+            document.getElementById("modalCloseBtn").style.display = "block";
+
+        } else {
+            document.getElementById("execModalOverlay").style.display = "none";
+            message.style.color = "#ef4444";
+            message.innerText = "❌ " + (result.message || "Trade execution failed.");
+        }
+
+    } catch (error) {
+        console.error(error);
+        document.getElementById("execModalOverlay").style.display = "none";
+        message.style.color = "#ef4444";
+        message.innerText = "❌ Network error. Unable to execute trade.";
+    }
+
+    button.disabled = false;
+}
+
+
+/* ==============================
+   START
+============================== */
+
+loadArbitrage();
+setInterval(loadArbitrage, 1000);
+
+</script>
+
+</body>
+
+</html>

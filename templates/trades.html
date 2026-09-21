@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>🔄 Trade History - Crypto Arbitrage Bot</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<aside class="sidebar">
+
+    <div class="logo">
+        ₿ Crypto Arbitrage
+    </div>
+
+    <nav>
+
+        <a href="/">
+            🏠 Dashboard
+        </a>
+
+        <a href="/prices">
+            📊 Live Prices
+        </a>
+
+        <a href="/arbitrage">
+            ⚡ Arbitrage
+        </a>
+
+        <a href="/trades" class="active">
+            🔄 Trade History
+        </a>
+
+        <a href="/settings">
+            ⚙ Settings
+        </a>
+
+    </nav>
+
+    <div class="bot-status">
+
+        <span class="dot"></span>
+        <span>Bot Online</span>
+
+    </div>
+
+</aside>
+
+
+<main class="main">
+
+    <header>
+
+        <div>
+
+            <h1>Trade History & Order Audit</h1>
+
+            <p>
+                Complete log of executed real trades & live exchange order IDs
+            </p>
+
+        </div>
+
+        <div id="time">
+            --:--:--
+        </div>
+
+    </header>
+
+
+    <section class="panel">
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+
+            <div class="auto-status">
+
+                <span class="dot"></span>
+
+                <span>
+                    Realistic Execution Engine Active
+                </span>
+
+            </div>
+
+            <button onclick="loadTrades()" style="background:#1e293b; border:1px solid #334155; color:#cbd5e1; padding:8px 14px; border-radius:8px; cursor:pointer; font-weight:600; font-size:12px;">
+                🔄 Refresh Log
+            </button>
+
+        </div>
+
+
+        <div style="overflow-x:auto; margin-top:25px;">
+
+            <table class="trade-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Order IDs</th>
+
+                        <th>Route (Buy ➔ Sell)</th>
+
+                        <th>Buy Price</th>
+
+                        <th>Sell Price</th>
+
+                        <th>Volume (ETH)</th>
+
+                        <th>Size (USDT)</th>
+
+                        <th>Slippage</th>
+
+                        <th>Fees</th>
+
+                        <th>Net Profit</th>
+
+                        <th>Executed At</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="tradeTable">
+
+                    <tr>
+
+                        <td colspan="10"
+                            style="text-align:center; padding:30px; color:#64748b;">
+
+                            Loading executed trade log...
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<script>
+
+function updateTime() {
+    document.getElementById("time").innerText = new Date().toLocaleTimeString();
+}
+updateTime();
+setInterval(updateTime, 1000);
+
+
+function formatTradeTime(dateStr) {
+    if (!dateStr) return '--';
+    try {
+        let str = String(dateStr).trim();
+        let isoStr = str.includes('T') ? str : str.replace(' ', 'T');
+
+        let hasOffset = str.includes('Z') || str.includes('+') || (str.includes('-') && str.lastIndexOf('-') > 10);
+        if (!hasOffset) {
+            isoStr += 'Z';
+        }
+
+        let d = new Date(isoStr);
+        if (isNaN(d.getTime())) {
+            d = new Date(str);
+        }
+        if (isNaN(d.getTime())) return str;
+
+        const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+        const datePart = d.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+        return `<span style="color:#cbd5e1; font-weight:600; white-space:nowrap;">${timeStr}</span><br><small style="color:#64748b; font-size:11px; white-space:nowrap;">${datePart}</small>`;
+    } catch (e) {
+        return dateStr;
+    }
+}
+
+async function loadTrades() {
+
+    try {
+
+        const response = await fetch("/api/trades");
+        const result = await response.json();
+
+        if (!result.success) return;
+
+        const table = document.getElementById("tradeTable");
+        table.innerHTML = "";
+
+        if (!result.trades || result.trades.length === 0) {
+            table.innerHTML = `
+                <tr>
+                    <td colspan="10" style="text-align:center; padding:40px; color:#94a3b8;">
+                        No real trades executed yet. Run an arbitrage trade or turn on Auto Trade.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        result.trades.forEach(trade => {
+
+            const row = document.createElement("tr");
+            const profit = Number(trade.profit);
+            const isPos = profit >= 0;
+
+            const buyId = trade.buy_order_id || 'ORD-BUY-AUTO';
+            const sellId = trade.sell_order_id || 'ORD-SEL-AUTO';
+            const ethAmt = Number(trade.eth_amount || (1000 / (trade.buy_price || 1))).toFixed(4);
+            const sizeUsdt = Number(trade.trade_amount || 1000).toFixed(0);
+            const slipPct = Number(trade.slippage || 0.05).toFixed(2);
+
+            const modeBadge = `<span style="font-size:10px; font-weight:700; background:#3f0f15; color:#ef4444; border:1px solid #7f1d1d; padding:2px 6px; border-radius:4px; display:inline-block; margin-bottom:4px;">🔴 REAL LIVE</span>`;
+
+            row.innerHTML = `
+
+
+                <td>
+                    ${modeBadge}
+                    <span style="font-family:monospace; font-size:11px; background:#0c1526; padding:3px 6px; border-radius:4px; color:#3b82f6; display:block;">${buyId}</span>
+                    <span style="font-family:monospace; font-size:11px; background:#0c1526; padding:3px 6px; border-radius:4px; color:#eab308; display:block; margin-top:2px;">${sellId}</span>
+                </td>
+
+
+                <td>
+                    <strong style="color:#22c55e;">${trade.buy_exchange}</strong>
+                    <span style="color:#64748b; margin:0 4px;">➔</span>
+                    <strong style="color:#ef4444;">${trade.sell_exchange}</strong>
+                </td>
+
+                <td>
+                    $${Number(trade.buy_price).toFixed(2)}
+                </td>
+
+                <td>
+                    $${Number(trade.sell_price).toFixed(2)}
+                </td>
+
+                <td style="font-weight:600; color:#f8fafc;">
+                    ${ethAmt} ETH
+                </td>
+
+                <td>
+                    $${sizeUsdt}
+                </td>
+
+                <td style="color:#eab308; font-size:13px;">
+                    ${slipPct}%
+                </td>
+
+                <td>
+                    $${Number(trade.fees).toFixed(2)}
+                </td>
+
+                <td class="${isPos ? 'profit-positive' : 'profit-negative'}">
+                    ${isPos ? '+' : ''}$${profit.toFixed(2)} USDT
+                </td>
+
+                <td>
+                    ${formatTradeTime(trade.created_at)}
+                </td>
+
+            `;
+
+            table.appendChild(row);
+
+        });
+
+    }
+
+    catch (error) {
+        console.error("Trade history error:", error);
+    }
+
+}
+
+loadTrades();
+setInterval(loadTrades, 5000);
+
+</script>
+
+</body>
+
+</html>
